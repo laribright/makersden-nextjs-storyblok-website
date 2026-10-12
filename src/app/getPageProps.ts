@@ -1,6 +1,11 @@
 import { type Metadata } from 'next';
 import { draftMode } from 'next/headers';
-import { notFound, redirect, RedirectType } from 'next/navigation';
+import {
+  notFound,
+  permanentRedirect,
+  redirect,
+  RedirectType,
+} from 'next/navigation';
 
 import { buildStoryblokMetadata } from '@/lib/metadata/buildStoryblokMetadata';
 import {
@@ -125,10 +130,11 @@ export const getPageProps = async (
     if ((err as { status?: number })?.status === 404) {
       if (redirectItem) {
         // this non-existent slug has a redirect setup
-        redirect(
-          redirectItem.to ?? '',
-          redirectItem.isPermanent ? RedirectType.replace : RedirectType.push,
-        );
+        if (redirectItem.isPermanent) {
+          permanentRedirect(redirectItem.to ?? '', RedirectType.replace);
+        }
+
+        redirect(redirectItem.to ?? '', RedirectType.push);
       } else {
         notFound();
       }
